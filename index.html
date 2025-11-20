@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <title>Prognostic Tool for Secondary Displacement – Distal Radius Fracture</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #f4f6f8;
+      margin: 0;
+      padding: 1.5rem;
+    }
+    .card {
+      max-width: 700px;
+      margin: 0 auto;
+      background: #ffffff;
+      border-radius: 12px;
+      padding: 1.5rem 1.75rem;
+      box-shadow: 0 6px 16px rgba(15, 23, 42, 0.08);
+    }
+    h1 {
+      font-size: 1.3rem;
+      margin-top: 0;
+      margin-bottom: 0.4rem;
+      font-weight: 700;
+    }
+    p.desc {
+      margin-top: 0;
+      color: #4b5563;
+      font-size: 0.9rem;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+      gap: 0.85rem 1.25rem;
+      margin-top: 1rem;
+    }
+    label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 0.25rem;
+      color: #374151;
+    }
+    input[type="number"], select {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 0.4rem 0.5rem;
+      border-radius: 6px;
+      border: 1px solid #d1d5db;
+      font-size: 0.9rem;
+    }
+    input[type="number"]:focus, select:focus {
+      outline: none;
+      border-color: #2563eb;
+      box-shadow: 0 0 0 1px rgba(37, 99, 235, 0.12);
+    }
+    .btn-row {
+      margin-top: 1.2rem;
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+    button {
+      border: none;
+      border-radius: 999px;
+      padding: 0.5rem 1.1rem;
+      font-size: 0.9rem;
+      cursor: pointer;
+    }
+    .btn-primary {
+      background: #2563eb;
+      color: #ffffff;
+    }
+    .btn-secondary {
+      background: #e5e7eb;
+      color: #374151;
+    }
+    .results {
+      margin-top: 1.3rem;
+      padding-top: 1rem;
+      border-top: 1px solid #e5e7eb;
+      font-size: 0.9rem;
+    }
+    .results h2 {
+      font-size: 1rem;
+      margin-top: 0;
+      margin-bottom: 0.6rem;
+    }
+    .res-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 0.25rem;
+    }
+    .res-label {
+      color: #4b5563;
+    }
+    .res-value {
+      font-weight: 600;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 999px;
+      padding: 0.18rem 0.6rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+    .badge-low {
+      background: #dcfce7;
+      color: #166534;
+    }
+    .badge-mod {
+      background: #fef9c3;
+      color: #854d0e;
+    }
+    .badge-high {
+      background: #fee2e2;
+      color: #b91c1c;
+    }
+    .small-note {
+      font-size: 0.75rem;
+      color: #6b7280;
+      margin-top: 0.4rem;
+    }
+    .copyright {
+      margin-top: 1.2rem;
+      text-align: center;
+      font-size: 0.75rem;
+      color: #6b7280;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Development and Validation of a Prognostic Tool for Predicting Secondary Displacement after Cast Immobilization in Distal Radius Fractures</h1>
+
+    <p class="desc">
+      Prognostic model using logistic regression and fractional polynomial transformation for age.
+    </p>
+
+    <div class="grid">
+      <div>
+        <label for="age">Age (years)</label>
+        <input id="age" type="number" min="0" step="0.1" placeholder="เช่น 55">
+      </div>
+
+      <div>
+        <label for="rh">Radial height (mm)</label>
+        <input id="rh" type="number" step="0.01" placeholder="เช่น 12.5">
+      </div>
+
+      <div>
+        <label for="da">Dorsal angulation (degrees)</label>
+        <input id="da" type="number" step="0.01" placeholder="เช่น 18">
+      </div>
+
+      <div>
+        <label for="intra">Intra-articular involvement</label>
+        <select id="intra">
+          <option value="0">No</option>
+          <option value="1">Yes</option>
+        </select>
+      </div>
+
+      <div>
+        <label for="uf">Associated ulnar fracture</label>
+        <select id="uf">
+          <option value="0">No</option>
+          <option value="1">Yes</option>
+        </select>
+      </div>
+
+      <div>
+        <label for="ao">AO/OTA classification</label>
+        <select id="ao">
+          <option value="1">A1 (Reference)</option>
+          <option value="2">A2</option>
+          <option value="3">A3</option>
+          <option value="4">B1</option>
+          <option value="5">C1</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn-primary" onclick="calculateRisk()">Calculate</button>
+      <button class="btn-secondary" onclick="resetForm()">Reset</button>
+    </div>
+
+    <div class="results" id="results" style="display:none;">
+      <h2>Results</h2>
+      <div class="res-row">
+        <div class="res-label">Linear predictor (LP):</div>
+        <div class="res-value" id="lpOut"></div>
+      </div>
+      <div class="res-row">
+        <div class="res-label">Probability of displacement:</div>
+        <div class="res-value" id="probOut"></div>
+      </div>
+      <div class="res-row">
+        <div class="res-label">Risk group:</div>
+        <div class="res-value" id="riskOut"></div>
+      </div>
+
+      <!--
+        <div class="small-note">
+             LP = β₀ + β₁(age³) + β₂(age³ ln(age)) + β₃(RH) + β₄(RH²) + …
+        </div>
+    -->
+    </div>
+
+    <div class="copyright">
+      Copyright © 2025 
+      Lertthitivong T, Laoasoke P, Lertsakpanich P, Malisorn S, Inta-ngam T.
+    </div>
+  </div>
+
+  <script>
+    // -----------------------------
+    // Coefficients (from Stata)
+    // -----------------------------
+    const B_AGE1   = -0.0000217;
+    const B_AGE2   =  0.00000547;
+    const B_RH     =  0.6262693;
+    const B_RH2    = -0.0380153;
+    const B_DA     =  0.0066639;
+    const B_INTRA1 = -1.411739;
+    const B_UF1    =  1.137129;
+
+    const B_AO2 = -1.880769;
+    const B_AO3 = -0.9075526;
+    const B_AO4 =  0.1264732;
+    const B_AO5 =  1.272963;
+
+    const B_CONST = -2.727189;
+
+    // -----------------------------
+    // Risk cutoffs (LP scale)
+    // -----------------------------
+    const CUT_LOW  = -1.113645;
+    const CUT_HIGH =  0.37448;
+
+    function calculateRisk() {
+      const age  = parseFloat(document.getElementById('age').value);
+      const rh   = parseFloat(document.getElementById('rh').value);
+      const da   = parseFloat(document.getElementById('da').value);
+      const intra = parseInt(document.getElementById('intra').value, 10);
+      const uf    = parseInt(document.getElementById('uf').value, 10);
+      const ao    = parseInt(document.getElementById('ao').value, 10);
+
+      if (isNaN(age) || age <= 0) {
+        alert('กรุณากรอกอายุให้ถูกต้อง');
+        return;
+      }
+
+      // FP(3,3)
+      const age1 = Math.pow(age, 3);
+      const age2 = age1 * Math.log(age);
+
+      const rh2 = rh * rh;
+
+      // Linear predictor (logit)
+      let lp = B_CONST
+               + B_AGE1 * age1
+               + B_AGE2 * age2
+               + B_RH   * rh
+               + B_RH2  * rh2
+               + B_DA   * da;
+
+      if (intra === 1) lp += B_INTRA1;
+      if (uf === 1)    lp += B_UF1;
+
+      if (ao === 2) lp += B_AO2;
+      else if (ao === 3) lp += B_AO3;
+      else if (ao === 4) lp += B_AO4;
+      else if (ao === 5) lp += B_AO5;
+
+      const prob = 1 / (1 + Math.exp(-lp));
+
+      let riskLabel = '';
+      let badgeClass = '';
+      if (lp <= CUT_LOW) {
+        riskLabel = 'Low risk';
+        badgeClass = 'badge badge-low';
+      } else if (lp <= CUT_HIGH) {
+        riskLabel = 'Moderate risk';
+        badgeClass = 'badge badge-mod';
+      } else {
+        riskLabel = 'High risk';
+        badgeClass = 'badge badge-high';
+      }
+
+      document.getElementById('lpOut').textContent   = lp.toFixed(4);
+      document.getElementById('probOut').textContent = (prob * 100).toFixed(1) + ' %';
+      document.getElementById('riskOut').innerHTML   = '<span class="' + badgeClass + '">' + riskLabel + '</span>';
+
+      document.getElementById('results').style.display = 'block';
+    }
+
+    function resetForm() {
+      document.getElementById('age').value = '';
+      document.getElementById('rh').value = '';
+      document.getElementById('da').value = '';
+      document.getElementById('intra').value = '0';
+      document.getElementById('uf').value = '0';
+      document.getElementById('ao').value = '1';
+      document.getElementById('results').style.display = 'none';
+    }
+  </script>
+</body>
+</html>
